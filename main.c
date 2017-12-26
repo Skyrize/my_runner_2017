@@ -159,13 +159,16 @@ void analyse_events(my_w_t *window)
 
 void move_those_amazing_rect(game_objs_t *tmp, my_w_t *window)
 {
-	if (tmp->type == PLAYER && window->clocker.seconds >= 0.085
-		&& window->jump_state == 0) {
+	static unsigned int no_clock_pro = 0;
+
+	if (tmp->type == PLAYER
+		&& no_clock_pro > 40 && window->jump_state == 0) {
 		move_rect(tmp);
-		sfClock_restart(window->clocker.clock);
+		no_clock_pro = 0;
 	}
 	if (tmp->type == BACKGROUND)
 		move_rect(tmp);
+	no_clock_pro++;
 }
 
 void check_if_out_of_map(sfVector2f *pos, game_objs_t *obj)
@@ -260,7 +263,7 @@ int seek_objs_first_time(my_w_t *window, int i)
 		} else if (window->map[i][j] == 'O') {
 			error_no = add_to_list("textures/box.png",
 			(my_type_t)BOX, window,
-			(sfVector2f){(j - 1) * 96, (i - 1) * 108});
+			(sfVector2f){(j - 1) * 96, ((i - 1) * 108) - 30});
 		}
 		if (error_no != 0)
 			return (error_no);
@@ -311,7 +314,18 @@ void print_my_helper(void)
 	my_printf("spikes,\n-Your map MUST be 12 char height including border");
 	my_printf("s,\n-Your map MUST be 22 char length MINIMUM including bo");
 	my_printf("rders,\n-Objects placed under the 10th line won't be count");
-	my_printf("ed.\n\nEnjoy !\n\n");
+	my_printf("ed.\n-Players coords are (4,8), so you better not put ");
+	my_printf("objects before the 20th char length !\n\nEnjoy !\n\n");
+}
+
+void display_lobby(my_w_t *window)
+{
+	if (fmod(window->clocker.seconds, 1.0/60.0) < 0.01) {
+		sfRenderWindow_clear(window->window, sfBlack);
+		jump_baby_jump(window);
+		read_list_and_display(window);
+		sfRenderWindow_display(window->window);
+	}
 }
 
 int main(int ac, char **av)
@@ -323,15 +337,10 @@ int main(int ac, char **av)
 		print_my_helper();
 		return (84);
 	}
+	sfRenderWindow_setFramerateLimit(window.window, 120);
 	while (sfRenderWindow_isOpen(window.window)) {
 		get_time(&window.clocker);
-		if (fmodf(window.clocker.seconds, 1.0/60.0) >= 0 &&
-		fmodf(window.clocker.seconds, 1.0/60.0) < 0.01) {
-			sfRenderWindow_clear(window.window, sfBlack);
-			jump_baby_jump(&window);
-			read_list_and_display(&window);
-			sfRenderWindow_display(window.window);
-		}
+		display_lobby(&window);
 		analyse_events(&window);
 	}
 	return (0);

@@ -18,5 +18,5 @@ int my_strncmp(char const *s1, char const *s2, int n)
 		i++;
 	}
 	x = s1[i] - s2[i];
-       	return (x);
+	return (x);
 }
