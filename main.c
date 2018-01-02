@@ -52,11 +52,13 @@ void create_background(game_objs_t *obj)
 
 void create_box(game_objs_t *obj, sfVector2f *coords)
 {
+	obj->rect_offset = -5;
 	sfSprite_setPosition(obj->sp, *coords);
 }
 
 void create_spike(game_objs_t *obj, sfVector2f *coords)
 {
+	obj->rect_offset = -5;
 	sfSprite_setPosition(obj->sp, *coords);
 }
 
@@ -130,9 +132,14 @@ my_w_t init_my_window(void)
 	my_w_t window;
 
 	window.error_no = 0;
-	window.jump_state = 0;
+	window.ground = 756;
+	window.jump_x = -44;
+	window.jump_state = sfFalse;
+	window.on_box = sfFalse;
+	window.music = sfMusic_createFromFile("sounds/undertale.ogg");
 	window.map_length = 0;
 	window.player_pos = (sfVector2f){288, 756};
+	window.player_base_pos = (sfVector2f){288, 756};
 	window.window = sfRenderWindow_create((sfVideoMode){1920, 1080, 32},
 	"Bootstrap.Runner", sfFullscreen, NULL);
 	window.clocker = init_timer();
@@ -151,8 +158,7 @@ void analyse_events(my_w_t *window)
 			|| sfKeyboard_isKeyPressed(sfKeyEscape) == sfTrue)
 			sfRenderWindow_close(window->window);
 		if (sfKeyboard_isKeyPressed(sfKeySpace) == sfTrue) {
-			window->jump_state = 1;
-			sfClock_restart(window->clocker.clock);
+			window->jump_state = sfTrue;
 		}
 	}
 }
@@ -162,13 +168,46 @@ void move_those_amazing_rect(game_objs_t *tmp, my_w_t *window)
 	static unsigned int no_clock_pro = 0;
 
 	if (tmp->type == PLAYER
-		&& no_clock_pro > 40 && window->jump_state == 0) {
+		&& no_clock_pro > 40 && window->jump_state == sfFalse) {
 		move_rect(tmp);
 		no_clock_pro = 0;
 	}
 	if (tmp->type == BACKGROUND)
 		move_rect(tmp);
 	no_clock_pro++;
+}
+
+int seek_objs(my_w_t *window, int i, unsigned int start)
+{
+	int error_no = 0;
+
+	if (window->map[i][start] == 'S') {
+		error_no = add_to_list("textures/spike.png",
+		(my_type_t)SPIKE, window,
+		(sfVector2f){2016, (i - 1) * 108});
+	} else if (window->map[i][start] == 'O') {
+		error_no = add_to_list("textures/box.png",
+		(my_type_t)BOX, window,
+		(sfVector2f){2016, ((i - 1) * 108) - 30});
+	}
+	if (error_no != 0)
+		return (error_no);
+	return (0);
+}
+
+int load_one_more_line(my_w_t *window)
+{
+	static unsigned int start = 21;
+
+	if (start > window->map_length - 1) {
+		start = 21;
+	}
+	for (int i = 1; i < 11; i++) {
+		if (seek_objs(window, i, start) != 0)
+			return (84);
+	}
+	start++;
+	return (0);
 }
 
 void check_if_out_of_map(sfVector2f *pos, game_objs_t *obj)
@@ -185,30 +224,89 @@ void check_if_out_of_map(sfVector2f *pos, game_objs_t *obj)
 	}
 }
 
-void display_obstacles(my_w_t *window)
+int block_parallax_and_death(my_w_t *window)
+{
+	game_objs_t *tmp = window->first;
+
+	while (tmp) {
+		if (tmp->type != PLAYER)
+			tmp->rect_offset = 0;
+		tmp = tmp->next;
+	}
+	return (0);
+}
+
+int check_if_spike(sfVector2f *obj_pos, game_objs_t *obj, my_w_t *window)
+{
+	if (obj->type == SPIKE && OBJ_X >= 200 && OBJ_X <= 390 && PLAYER_Y + 115 >= OBJ_Y && PLAYER_Y + 115 <= OBJ_Y + 115) {
+		block_parallax_and_death(window);
+		window->ground = 1400;
+		window->jump_state = sfTrue;
+	}
+	return (0);
+}
+
+int check_obstacle_pos(sfVector2f *obj_pos, game_objs_t *obj, my_w_t *window)
+{
+	if (OBJ_X <= 510 && OBJ_X >= 170) {
+		check_if_spike(obj_pos, obj, window);
+		if (OBJ_X >= 188 && OBJ_X <= 403 && PLAYER_Y + 85 >= OBJ_Y
+		&& PLAYER_Y + 85 <= OBJ_Y + 8 && obj->type == BOX) {
+			window->on_box = sfTrue;
+			window->jump_state = sfFalse;
+			window->jump_x = -44;
+			BASE = sfSprite_getPosition(window->player->sp);
+		} else if (OBJ_X < 188 && PLAYER_Y + 85 >= OBJ_Y
+			&& PLAYER_Y + 85 <= OBJ_Y + 8
+			&& window->on_box == sfFalse && obj->type == BOX) {
+			window->on_box = sfFalse;
+			window->jump_state = sfTrue;
+			window->jump_x = 28;
+			BASE.y = window->ground;
+		} else
+			window->on_box = sfFalse;
+	}
+	return (0);
+}
+
+int display_obstacles(my_w_t *window)
 {
 	game_objs_t *tmp = window->first;
 	sfVector2f pos = {0, 0};
-	static int loader = 0;
+	static int loader = 1;
 
+	if (loader > 22 && window->ground == 756) {
+		if (load_one_more_line(window) != 0)
+			return (84);
+		loader = 1;
+	}
 	while (tmp) {
 		if (tmp->type == SPIKE || tmp->type == BOX) {
 			sfRenderWindow_drawSprite(window->window, tmp->sp, NULL);
-			sfSprite_move(tmp->sp, (sfVector2f){-5, 0});
+			sfSprite_move(tmp->sp, (sfVector2f){tmp->rect_offset, 0});
 			pos = sfSprite_getPosition(tmp->sp);
 			check_if_out_of_map(&pos, tmp);
+			check_obstacle_pos(&pos, tmp, window);
 		}
 		tmp = tmp->next;
 	}
 	loader++;
+	return (0);
 }
 
-void read_list_and_display(my_w_t *window)
+void display_player(my_w_t *window)
+{
+	move_those_amazing_rect(window->player, window);
+	sfSprite_setTextureRect(window->player->sp, window->player->rect);
+	sfRenderWindow_drawSprite(window->window, window->player->sp, NULL);
+}
+
+int read_list_and_display(my_w_t *window)
 {
 	game_objs_t *tmp = window->first;
 
 	while (tmp) {
-		if (tmp->type != BACKGROUND && tmp->type != PLAYER) {
+		if (tmp->type != BACKGROUND) {
 			tmp = tmp->next;
 			continue;
 		}
@@ -217,28 +315,38 @@ void read_list_and_display(my_w_t *window)
 		sfRenderWindow_drawSprite(window->window, tmp->sp, NULL);
 		tmp = tmp->next;
 	}
-	display_obstacles(window);
+	if (display_obstacles(window) != 0)
+		return (84);
+	display_player(window);
+	return (0);
 }
 
 int get_x_pos(my_w_t *window)
 {
-	static int x = -44;
-
-	if (x < 44) {
-		x++;
+	if (window->jump_x < 44
+		|| (PLAYER_Y < window->ground && window->on_box == sfFalse)) {
+		window->jump_x++;
 	} else {
-		window->jump_state = 0;
-		x = -44;
+		window->jump_state = sfFalse;
+		BASE.y = window->ground;
+		sfSprite_setPosition(window->player->sp, BASE);
+		window->jump_x = -44;
 	}
-	return (x);
+	return (window->jump_x);
 }
 
 void jump_baby_jump(my_w_t *window)
 {
-	if (window->jump_state == 1) {
-		window->player_pos.y = 756 -
-		(-0.1 * powf(get_x_pos(window), 2) + 200);
+	int x = 0;
+
+	if (window->jump_state == sfTrue) {
+		x = get_x_pos(window);
+		PLAYER_Y = BASE.y -
+		(-0.1 * powf(x, 2) + 194);
 		sfSprite_setPosition(window->player->sp, window->player_pos);
+		if (window->ground != 756) {
+			sfSprite_rotate(window->player->sp, -3);
+		}
 	}
 }
 
@@ -318,14 +426,40 @@ void print_my_helper(void)
 	my_printf("objects before the 20th char length !\n\nEnjoy !\n\n");
 }
 
-void display_lobby(my_w_t *window)
+int display_lobby(my_w_t *window)
 {
-	if (fmod(window->clocker.seconds, 1.0/60.0) < 0.01) {
+	if (window->clocker.seconds >= 1.0/180.0) {
 		sfRenderWindow_clear(window->window, sfBlack);
 		jump_baby_jump(window);
-		read_list_and_display(window);
+		if (read_list_and_display(window) != 0)
+			return (84);
 		sfRenderWindow_display(window->window);
+		sfClock_restart(window->clocker.clock);
 	}
+	return (0);
+}
+
+void destroy_and_free(my_w_t *window)
+{
+	game_objs_t *tmp = window->first->next;
+
+	while (tmp) {
+		sfSprite_destroy(tmp->prev->sp);
+		sfTexture_destroy(tmp->prev->tx);
+		free(tmp->prev);
+		tmp = tmp->next;
+		if (!tmp->next) {
+			sfSprite_destroy(tmp->sp);
+			sfTexture_destroy(tmp->tx);
+			free(tmp);
+		}
+	}
+	sfMusic_destroy(window->music);
+	for (int i = 0; i < 12; i++)
+		free(window->map[i]);
+	free(window->map);
+	sfRenderWindow_destroy(window->window);
+	free(window);
 }
 
 int main(int ac, char **av)
@@ -337,10 +471,13 @@ int main(int ac, char **av)
 		print_my_helper();
 		return (84);
 	}
+	sfMusic_play(window.music);
+	sfMusic_setLoop(window.music, sfTrue);
 	sfRenderWindow_setFramerateLimit(window.window, 120);
 	while (sfRenderWindow_isOpen(window.window)) {
 		get_time(&window.clocker);
-		display_lobby(&window);
+		if (display_lobby(&window) != 0)
+			return (84);
 		analyse_events(&window);
 	}
 	return (0);

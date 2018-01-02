@@ -73,6 +73,17 @@ typedef struct fnct_s
 	void (*fptr)(va_list list);
 } fnct_t;
 
+/* CSFML */
+
+typedef struct framebuffer_s
+{
+	unsigned int width;
+	unsigned int height;
+	sfUint8 *pixels;
+} framebuffer_t;
+
+void place_a_square(sfVector2f *, sfVector2f *, sfRenderWindow *, sfColor *);
+
 /* MY_RUNNER */
 
 typedef struct ctime_s
@@ -87,12 +98,18 @@ typedef struct game_objs_s game_objs_t;
 typedef struct my_window_s
 {
 	int error_no;
-	int jump_state;
+	int ground;
+	int jump_x;
+	int jump_stock;
+	sfBool jump_state;
+	sfBool on_box;
 	unsigned int map_length;
 	char **map;
+	sfVector2f player_base_pos;
 	sfVector2f player_pos;
 	sfRenderWindow *window;
 	sfEvent event;
+	sfMusic *music;
 	ctime_t clocker;
 	game_objs_t *first;
 	game_objs_t *player;
@@ -120,8 +137,12 @@ typedef struct game_objs_s
 
 ctime_t init_timer(void);
 my_w_t init_my_window(void);
-void destroy_and_free(my_w_t *, ctime_t *, int);
+void destroy_and_free(my_w_t *);
 void get_time(ctime_t *);
 void analyse_events(my_w_t *);
 
+#define BASE window->player_base_pos
+#define PLAYER_Y window->player_pos.y
+#define OBJ_Y obj_pos->y
+#define OBJ_X obj_pos->x
 #endif /* MY_H_ */
