@@ -11,7 +11,7 @@ OBJ	=	$(SRC:.c=.o)
 
 NAME	=	my_runner
 
-GFLAGS	=	-lcsfml-graphics -lcsfml-audio -lcsfml-system -lcsfml-window -L./lib/my -lmy
+GFLAGS	=	-lc_graph_prog -L./lib/my -lmy
 
 CC	=	gcc -Wall -Wextra -Werror -W
 

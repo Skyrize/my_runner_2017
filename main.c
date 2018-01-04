@@ -238,7 +238,8 @@ int block_parallax_and_death(my_w_t *window)
 
 int check_if_spike(sfVector2f *obj_pos, game_objs_t *obj, my_w_t *window)
 {
-	if (obj->type == SPIKE && OBJ_X >= 200 && OBJ_X <= 390 && PLAYER_Y + 115 >= OBJ_Y && PLAYER_Y + 115 <= OBJ_Y + 115) {
+	if (obj->type == SPIKE && OBJ_X >= 200 && OBJ_X <= 390
+		&& PLAYER_Y + 115 >= OBJ_Y && PLAYER_Y + 115 <= OBJ_Y + 115) {
 		block_parallax_and_death(window);
 		window->ground = 1400;
 		window->jump_state = sfTrue;
@@ -282,8 +283,10 @@ int display_obstacles(my_w_t *window)
 	}
 	while (tmp) {
 		if (tmp->type == SPIKE || tmp->type == BOX) {
-			sfRenderWindow_drawSprite(window->window, tmp->sp, NULL);
-			sfSprite_move(tmp->sp, (sfVector2f){tmp->rect_offset, 0});
+			sfRenderWindow_drawSprite(window->window,
+				tmp->sp, NULL);
+			sfSprite_move(tmp->sp,
+				(sfVector2f){tmp->rect_offset, 0});
 			pos = sfSprite_getPosition(tmp->sp);
 			check_if_out_of_map(&pos, tmp);
 			check_obstacle_pos(&pos, tmp, window);
@@ -402,7 +405,8 @@ int create_and_load(char *str, my_w_t *window)
 	close(fd);
 	fd = open(str, O_RDONLY);
 	for (int i = 0; i < 12; i++) {
-		window->map[i] = malloc(sizeof(char) * (window->map_length + 1));
+		window->map[i] = malloc(sizeof(char)
+		* (window->map_length + 1));
 		if (!window->map[i])
 			return (84);
 		read(fd, window->map[i], window->map_length + 1);
@@ -443,23 +447,20 @@ void destroy_and_free(my_w_t *window)
 {
 	game_objs_t *tmp = window->first->next;
 
-	while (tmp) {
+	while (tmp->next) {
 		sfSprite_destroy(tmp->prev->sp);
 		sfTexture_destroy(tmp->prev->tx);
 		free(tmp->prev);
 		tmp = tmp->next;
-		if (!tmp->next) {
-			sfSprite_destroy(tmp->sp);
-			sfTexture_destroy(tmp->tx);
-			free(tmp);
-		}
 	}
+	sfSprite_destroy(tmp->sp);
+	sfTexture_destroy(tmp->tx);
+	free(tmp);
 	sfMusic_destroy(window->music);
 	for (int i = 0; i < 12; i++)
 		free(window->map[i]);
 	free(window->map);
 	sfRenderWindow_destroy(window->window);
-	free(window);
 }
 
 int main(int ac, char **av)
@@ -480,5 +481,6 @@ int main(int ac, char **av)
 			return (84);
 		analyse_events(&window);
 	}
+	destroy_and_free(&window);
 	return (0);
 }
