@@ -39,7 +39,7 @@ framebuffer_t *draw_square(sfVector2f *size, sfColor *color)
 	int y = 0;
 
 	for (int i = 0 ; i < size->y ; i++) {
-		for (int j = 0 ; j < size->y ; j++) {
+		for (int j = 0 ; j < size->x ; j++) {
 			my_put_pixel(framebuffer, x, y, *color);
 			x++;
 		}

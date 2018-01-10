@@ -43,7 +43,8 @@ SRC	=	my_compute_power_rec.c	\
 		my_put_llnbr.c	\
 		my_putnbr_base.c	\
 		my_double_strcat.c	\
-		put_a_square_csfml.c
+		put_a_square_csfml.c	\
+		my_int_to_array.c
 
 OBJ	=	$(SRC:.c=.o)
 

@@ -51,6 +51,7 @@ int my_showstr(char const *);
 int my_showmem(char const *, int);
 char *my_strcat(char *, char const *);
 char *my_strncat(char *, char const *, int);
+char *my_int_to_array(int);
 
 /* MY_PRINTF */
 
@@ -95,12 +96,23 @@ typedef struct ctime_s
 
 typedef struct game_objs_s game_objs_t;
 
+typedef enum
+{
+	NONE_MENU,
+	MAIN_MENU,
+	PAUSE_MENU,
+	END_MENU,
+} my_menu_type_t;
+
 typedef struct my_window_s
 {
 	int error_no;
 	int ground;
 	int jump_x;
-	int jump_stock;
+	unsigned int map_loader;
+	unsigned int map_reader;
+	my_menu_type_t menu;
+	sfBool end_game;
 	sfBool jump_state;
 	sfBool on_box;
 	unsigned int map_length;
@@ -109,9 +121,17 @@ typedef struct my_window_s
 	sfVector2f player_pos;
 	sfRenderWindow *window;
 	sfEvent event;
-	sfMusic *music;
+	sfMusic *select_sound;
+	sfMusic *jump_sound;
+	sfMusic *death_sound;
+	sfMusic *game_music;
+	sfMusic *lose_music;
+	sfMusic *win_music;
+	sfFont *font;
+	sfText *score;
 	ctime_t clocker;
 	game_objs_t *first;
+	game_objs_t *selector;
 	game_objs_t *player;
 } my_w_t;
 
@@ -121,11 +141,15 @@ typedef enum
 	BACKGROUND,
 	BOX,
 	SPIKE,
-} my_type_t;
+	MAIN,
+	PAUSE,
+	END,
+	MENU_SELECTOR,
+} my_obj_type_t;
 
 typedef struct game_objs_s
 {
-	my_type_t type;
+	my_obj_type_t type;
 	sfSprite *sp;
 	sfTexture *tx;
 	sfIntRect rect;
