@@ -48,7 +48,7 @@ int main(int ac, char **av)
 	my_w_t window = init_my_window();
 
 	if (!window.first || window.error_no != 0 || ac != 2
-		|| create_and_load(av[1], &window) != 0) {
+	|| create_and_load(av[1], &window) != 0) {
 		print_my_helper();
 		destroy_and_free(&window);
 		return (84);
