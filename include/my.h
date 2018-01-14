@@ -104,33 +104,75 @@ typedef enum
 	END_MENU,
 } my_menu_type_t;
 
-typedef struct my_window_s
+typedef struct textures_lib_s
 {
-	int error_no;
-	int ground;
-	int jump_x;
-	unsigned int map_loader;
-	unsigned int map_reader;
-	my_menu_type_t menu;
-	sfBool end_game;
-	sfBool jump_state;
-	sfBool on_box;
-	unsigned int map_length;
-	char **map;
-	sfVector2f player_base_pos;
-	sfVector2f player_pos;
-	sfRenderWindow *window;
-	sfEvent event;
+	sfTexture *player_tx;
+	sfTexture *spike_tx;
+	sfTexture *box_tx;
+	sfTexture *ground_tx;
+	sfTexture *forest_tx;
+	sfTexture *city1_tx;
+	sfTexture *sky_tx;
+	sfTexture *switch_on_off_tx;
+	sfTexture *selector_tx;
+	sfTexture *win_menu_tx;
+	sfTexture *main_menu_tx;
+	sfTexture *pause_exit_tx;
+} textures_lib_t;
+
+typedef struct audio_lib_s
+{
 	sfMusic *select_sound;
 	sfMusic *jump_sound;
 	sfMusic *death_sound;
 	sfMusic *game_music;
 	sfMusic *lose_music;
 	sfMusic *win_music;
+} audio_lib_t;
+
+typedef struct map_tools_s
+{
+	unsigned int map_loader;
+	unsigned int map_reader;
+	unsigned int map_length;
+	char **map;
+} map_tools_t;
+
+typedef struct game_tools_s
+{
+	int ground;
+	int jump_x;
+	int jump_max;
+	sfBool infinite_mode;
+	sfBool end_game;
+	sfBool jump_state;
+	sfBool on_box;
+	sfVector2f player_pos;
+	sfVector2f player_base_pos;
+} game_tools_t;
+
+typedef struct score_tools_s
+{
+	unsigned int score_points;
 	sfFont *font;
 	sfText *score;
+	sfText *points;
+} score_tools_t;
+
+typedef struct my_window_s
+{
+	int error_no;
+	sfRenderWindow *window;
+	sfEvent event;
 	ctime_t clocker;
+	score_tools_t score_tools;
+	game_tools_t game_tools;
+	map_tools_t map_tools;
+	my_menu_type_t menu;
+	textures_lib_t txtrs_lib;
+	audio_lib_t audio_lib;
 	game_objs_t *first;
+	game_objs_t *switcher;
 	game_objs_t *selector;
 	game_objs_t *player;
 } my_w_t;
@@ -151,7 +193,6 @@ typedef struct game_objs_s
 {
 	my_obj_type_t type;
 	sfSprite *sp;
-	sfTexture *tx;
 	sfIntRect rect;
 	int rect_max_value;
 	int rect_offset;
@@ -165,8 +206,14 @@ void destroy_and_free(my_w_t *);
 void get_time(ctime_t *);
 void analyse_events(my_w_t *);
 
-#define BASE window->player_base_pos
-#define PLAYER_Y window->player_pos.y
+#define SCORE_T window->score_tools
+#define GAME_T window->game_tools
+#define MAP_T window->map_tools
+#define AUDIO_L window->audio_lib
+#define TXTR_L window->txtrs_lib
+#define BASE GAME_T.player_base_pos
+#define PLAYER_X GAME_T.player_pos.x
+#define PLAYER_Y GAME_T.player_pos.y
 #define OBJ_Y obj_pos->y
 #define OBJ_X obj_pos->x
 #endif /* MY_H_ */
