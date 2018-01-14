@@ -77,6 +77,7 @@ void select_choice(my_w_t *window, int *selected, my_obj_type_t *menu_type)
 	}
 	if (*menu_type == MAIN) {
 		select_mode(window);
-		sfRenderWindow_drawSprite(window->window, window->switcher->sp, NULL);
+		sfRenderWindow_drawSprite(window->window,
+			window->switcher->sp, NULL);
 	}
 }
