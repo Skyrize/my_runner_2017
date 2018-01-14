@@ -205,6 +205,37 @@ my_w_t init_my_window(void);
 void destroy_and_free(my_w_t *);
 void get_time(ctime_t *);
 void analyse_events(my_w_t *);
+int choose_my_menu_or_game(my_w_t *);
+void destroy_musics(my_w_t *window);
+void destroy_my_textures_lib(my_w_t *window);
+void destroy_and_free_my_objs(my_w_t *window);
+void free_my_map(my_w_t *window);
+void destroy_my_score(my_w_t *window);
+int create_and_load(char *str, my_w_t *window);
+void check_menu_type_for_action(my_w_t *window);
+void display_menu_type(my_w_t *window, my_obj_type_t menu_type);
+void restart_game(my_w_t *window);
+void select_choice(my_w_t *window, int *selected, my_obj_type_t *menu_type);
+int compute_and_display_game(my_w_t *window);
+int accelerate_my_game(my_w_t *window);
+int add_to_list(sfTexture *texture, my_obj_type_t type, my_w_t *window, sfVector2f coords);
+void check_if_out_of_map(sfVector2f *pos, game_objs_t *obj);
+int load_one_more_line(my_w_t *window);
+void kill_my_budy(my_w_t *window);
+void move_those_amazing_rect(game_objs_t *tmp, my_w_t *window);
+void create_player(game_objs_t *obj, sfVector2f *coords);
+void create_background(game_objs_t *obj);
+void create_box(game_objs_t *obj, sfVector2f *coords);
+void create_spike(game_objs_t *obj, sfVector2f *coords);
+void create_menu(game_objs_t *obj, sfVector2f *coords);
+void create_menu_selector(game_objs_t *obj, sfVector2f *coords);
+void set_my_game_tools_to_default(my_w_t *window);
+void set_my_map_tools_to_default(my_w_t *window, sfBool init);
+void set_my_score_to_zero(my_w_t *window);
+void init_my_game_objects_list(my_w_t *window);
+int display_obstacles(my_w_t *window);
+void display_player(my_w_t *window);
+void jump_baby_jump(my_w_t *window);
 
 #define SCORE_T window->score_tools
 #define GAME_T window->game_tools
