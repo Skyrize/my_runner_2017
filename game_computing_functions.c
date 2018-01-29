@@ -16,11 +16,10 @@ int accelerate_my_game(my_w_t *window)
 {
 	game_objs_t *tmp = window->first;
 
+	GAME_T.obj_start_offset--;
 	while (tmp) {
 		if (tmp->type == PLAYER || tmp->type == BACKGROUND)
 			tmp->rect_offset++;
-		if (tmp->type == BOX || tmp->type == SPIKE)
-			tmp->rect_offset--;
 		tmp = tmp->next;
 	}
 	return (0);

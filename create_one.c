@@ -25,15 +25,15 @@ void create_background(game_objs_t *obj)
 	offset -= 2;
 }
 
-void create_box(game_objs_t *obj, sfVector2f *coords)
+void create_box(game_objs_t *obj, sfVector2f *coords, my_w_t *window)
 {
-	obj->rect_offset = -5;
+	obj->rect_offset = GAME_T.obj_start_offset;
 	sfSprite_setPosition(obj->sp, *coords);
 }
 
-void create_spike(game_objs_t *obj, sfVector2f *coords)
+void create_spike(game_objs_t *obj, sfVector2f *coords, my_w_t *window)
 {
-	obj->rect_offset = -5;
+	obj->rect_offset = GAME_T.obj_start_offset;
 	sfSprite_setPosition(obj->sp, *coords);
 }
 

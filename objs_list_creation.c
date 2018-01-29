@@ -6,7 +6,7 @@
 */
 #include "include/my.h"
 
-void detect_type(game_objs_t *obj, sfVector2f *coords)
+void detect_type(game_objs_t *obj, sfVector2f *coords, my_w_t *window)
 {
 	switch (obj->type) {
 	case PLAYER:
@@ -16,10 +16,10 @@ void detect_type(game_objs_t *obj, sfVector2f *coords)
 		create_background(obj);
 		break;
 	case BOX:
-		create_box(obj, coords);
+		create_box(obj, coords, window);
 		break;
 	case SPIKE:
-		create_spike(obj, coords);
+		create_spike(obj, coords, window);
 		break;
 	case MENU_SELECTOR:
 		create_menu_selector(obj, coords);
@@ -31,7 +31,7 @@ void detect_type(game_objs_t *obj, sfVector2f *coords)
 }
 
 game_objs_t *init_game_objs(sfTexture *texture, my_obj_type_t type,
-	sfVector2f *coords)
+	sfVector2f *coords, my_w_t *window)
 {
 	game_objs_t *new_obj = malloc(sizeof(game_objs_t));
 
@@ -43,7 +43,7 @@ game_objs_t *init_game_objs(sfTexture *texture, my_obj_type_t type,
 	new_obj->rect_offset = 0;
 	new_obj->sp = sfSprite_create();
 	sfSprite_setTexture(new_obj->sp, texture, sfTrue);
-	detect_type(new_obj, coords);
+	detect_type(new_obj, coords, window);
 	new_obj->next = NULL;
 	new_obj->prev = NULL;
 	return (new_obj);
@@ -52,7 +52,7 @@ game_objs_t *init_game_objs(sfTexture *texture, my_obj_type_t type,
 int add_to_list(sfTexture *texture, my_obj_type_t type,
 	my_w_t *window, sfVector2f coords)
 {
-	game_objs_t *new_obj = init_game_objs(texture, type, &coords);
+	game_objs_t *new_obj = init_game_objs(texture, type, &coords, window);
 
 	if (new_obj == NULL)
 		return (84);

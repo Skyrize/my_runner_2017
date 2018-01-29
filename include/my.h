@@ -143,6 +143,7 @@ typedef struct game_tools_s
 	int ground;
 	int jump_x;
 	int jump_max;
+	int obj_start_offset;
 	sfBool infinite_mode;
 	sfBool end_game;
 	sfBool jump_state;
@@ -225,8 +226,8 @@ void kill_my_budy(my_w_t *window);
 void move_those_amazing_rect(game_objs_t *tmp, my_w_t *window);
 void create_player(game_objs_t *obj, sfVector2f *coords);
 void create_background(game_objs_t *obj);
-void create_box(game_objs_t *obj, sfVector2f *coords);
-void create_spike(game_objs_t *obj, sfVector2f *coords);
+void create_box(game_objs_t *obj, sfVector2f *coords, my_w_t *);
+void create_spike(game_objs_t *obj, sfVector2f *coords, my_w_t *);
 void create_menu(game_objs_t *obj, sfVector2f *coords);
 void create_menu_selector(game_objs_t *obj, sfVector2f *coords);
 void set_my_game_tools_to_default(my_w_t *window);

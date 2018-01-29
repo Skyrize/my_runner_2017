@@ -11,6 +11,7 @@ void set_my_game_tools_to_default(my_w_t *window)
 	GAME_T.ground = 756;
 	GAME_T.jump_x = -44;
 	GAME_T.jump_max = 44;
+	GAME_T.obj_start_offset = -5;
 	GAME_T.end_game = sfFalse;
 	GAME_T.jump_state = sfFalse;
 	GAME_T.on_box = sfFalse;
